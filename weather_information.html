@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Weather App</title>
+  <style>
+    body { font-family: sans-serif; max-width: 360px; margin: 50px auto; text-align: center; }
+    form { display: flex; gap: 8px; }
+    input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 14px; cursor: pointer; }
+    #output { margin-top: 20px; padding: 15px; border-radius: 6px; background: #f4f6f8; display: none; }
+    .error { color: #d93025; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h2>Weather Finder</h2>
+  <form id="weather-form">
+    <input type="text" id="city" placeholder="Enter city (e.g., London)" />
+    <button type="submit">Search</button>
+  </form>
+
+  <p id="error" class="error"></p>
+  <div id="output"></div>
+
+  <script>
+    const weatherCodes = {
+      0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
+      45: "Foggy", 51: "Light drizzle", 61: "Light rain", 63: "Moderate rain",
+      65: "Heavy rain", 71: "Light snow", 80: "Rain showers", 95: "Thunderstorm"
+    };
+
+    document.getElementById("weather-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const city = document.getElementById("city").value.trim();
+      const output = document.getElementById("output");
+      const error = document.getElementById("error");
+
+      output.style.display = "none";
+      error.textContent = "";
+
+      if (!city) {
+        error.textContent = "Please enter a city name.";
+        return;
+      }
+
+      try {
+        // 1. Convert city name to coordinates
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1`);
+        const geoData = await geoRes.json();
+
+        if (!geoData.results) {
+          throw new Error("City not found. Please check the spelling.");
+        }
+
+        const { latitude, longitude, name, country } = geoData.results[0];
+
+        // 2. Fetch real-time weather using coordinates
+        const weatherRes = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code`
+        );
+        const { current } = await weatherRes.json();
+
+        // 3. Display results
+        output.innerHTML = `
+          <h3>${name}, ${country}</h3>
+          <p><strong>Temperature:</strong> ${current.temperature_2m}°C</p>
+          <p><strong>Humidity:</strong> ${current.relative_humidity_2m}%</p>
+          <p><strong>Condition:</strong> ${weatherCodes[current.weather_code] || "Moderate weather"}</p>
+        `;
+        output.style.display = "block";
+      } catch (err) {
+        error.textContent = err.message || "Unable to fetch weather data.";
+      }
+    });
+  </script>
+</body>
+</html>

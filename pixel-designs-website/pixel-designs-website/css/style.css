@@ -1,0 +1,575 @@
+/* =============================================================
+   PIXEL DESIGNS — stylesheet
+   A media/advertising agency site. Visual identity is built
+   around a literal "pixel grid" motif (small blocks combining
+   into one image), echoing the idea of many channels forming
+   one campaign.
+   ============================================================= */
+
+/* -------------------------------------------------------------
+   1. Design tokens
+------------------------------------------------------------- */
+:root {
+  /* colour */
+  --ink:        #14140F;   /* near-black, warm rather than pure black */
+  --paper:      #F1EEE4;   /* unbleached "paper" background, not pure white */
+  --paper-dim:  #E7E2D3;   /* slightly deeper paper for panels/cards */
+  --teal:       #1F4B4A;   /* broadcast/screen-inspired secondary */
+  --teal-dim:   #0d0e0d;
+  --signal:     #FF4B2B;   /* single accent colour, used sparingly */
+  --line:       rgba(20, 20, 15, 0.14);
+  --line-light: rgba(241, 238, 228, 0.22);
+
+  /* type */
+  --font-display: 'Space Grotesk', 'Arial Narrow', sans-serif;
+  --font-body: 'Instrument Sans', 'Segoe UI', sans-serif;
+
+  /* layout */
+  --wrap: 1180px;
+  --gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --radius: 2px; /* sharp, screen/billboard-like edges rather than soft cards */
+}
+
+/* -------------------------------------------------------------
+   2. Reset & base
+------------------------------------------------------------- */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { max-width: 100%; display: block; }
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.05;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p { margin: 0; }
+
+ul { list-style: none; margin: 0; padding: 0; }
+
+button { font: inherit; }
+
+.wrap {
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.75em 1.25em;
+  z-index: 200;
+}
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+
+/* Buttons ------------------------------------------------------ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.85em 1.6em;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.btn--solid {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn--solid:hover { background: var(--signal); border-color: var(--signal); }
+.btn--outline {
+  background: transparent;
+  color: var(--ink);
+}
+.btn--outline:hover { border-color: var(--signal); color: var(--signal); }
+
+/* -------------------------------------------------------------
+   3. Header & navigation (Flexbox)
+------------------------------------------------------------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-block: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+
+.brand__type { display: flex; flex-direction: column; line-height: 1.15; }
+.brand__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.01em;
+}
+.brand__sub {
+  font-size: 0.68rem;
+  color: var(--teal);
+  font-weight: 500;
+}
+
+.primary-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.primary-nav__list {
+  display: flex;
+  gap: 1.75rem;
+}
+
+.primary-nav__list a {
+  font-weight: 500;
+  font-size: 0.95rem;
+  position: relative;
+  padding-bottom: 2px;
+}
+.primary-nav__list a:hover { color: var(--signal); }
+
+/* The real control is this checkbox — kept in the tab order and
+   operable with the keyboard (space/enter), but visually hidden so the
+   label below can stand in as the styled hamburger button. This is the
+   "checkbox hack": a pure CSS/HTML way to open and close the mobile
+   menu with no JavaScript at all. */
+.nav-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+}
+
+.nav-toggle {
+  display: none;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+.nav-toggle-input:focus-visible + .nav-toggle {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.nav-toggle__box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 26px;
+}
+.nav-toggle__bar {
+  height: 2px;
+  background: var(--ink);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+/* When the checkbox is checked, style the two bars of its sibling
+   label into an "X" — the only signal that the menu is open. */
+.nav-toggle-input:checked + .nav-toggle .nav-toggle__bar:first-child {
+  transform: translateY(4px) rotate(45deg);
+}
+.nav-toggle-input:checked + .nav-toggle .nav-toggle__bar:last-child {
+  transform: translateY(-4px) rotate(-45deg);
+}
+
+/* A full-panel label placed inside the nav, sharing the same "for" as
+   the toggle checkbox. Clicking anywhere on it (including the empty
+   space above the links) closes the menu again, since a label click
+   always toggles its associated checkbox. */
+.nav-close {
+  display: none;
+}
+
+/* -------------------------------------------------------------
+   4. Hero (Flexbox two-column, collapses on mobile)
+------------------------------------------------------------- */
+.hero { padding-block: clamp(3rem, 8vw, 6rem) clamp(3rem, 6vw, 5rem); }
+
+.hero__inner {
+  display: flex;
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+.hero__copy { flex: 1 1 54%; min-width: 0; }
+
+.hero__headline {
+  display: flex;
+  flex-direction: column;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  text-transform: uppercase;
+}
+.hero__headline span:nth-child(2) { color: var(--teal); }
+.hero__headline span:nth-child(3) { color: var(--signal); }
+
+.hero__lede {
+  margin-top: 1.75rem;
+  max-width: 46ch;
+  font-size: 1.1rem;
+  color: var(--ink);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 2.25rem;
+}
+
+.hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 2.75rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--line);
+}
+.hero__fact dt {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--teal);
+}
+.hero__fact dd {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  max-width: 14ch;
+}
+
+/* Hero banner: the pixel-grid graphic (CSS Grid) ---------------- */
+.hero__banner { flex: 1 1 40%; min-width: 0; }
+
+.pixel-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  gap: clamp(4px, 0.8vw, 8px);
+  aspect-ratio: 1 / 1;
+  width: 100%;
+}
+
+.pixel-grid span {
+  background: var(--paper-dim);
+  border-radius: 1px;
+  opacity: 0;
+  transform: scale(0.6);
+  animation: pixel-in 0.5s ease forwards;
+}
+/* A handful of the 36 blocks (marked directly in the HTML) are tinted
+   so the grid reads as a few "lit" placements rather than one flat
+   colour — see index.html for which cells carry these classes. */
+.pixel-grid span.pixel--teal   { background: var(--teal); }
+.pixel-grid span.pixel--signal { background: var(--signal); }
+
+@keyframes pixel-in {
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pixel-grid span { animation: none; opacity: 1; transform: none; }
+}
+
+/* -------------------------------------------------------------
+   5. Channels / services section (CSS Grid)
+------------------------------------------------------------- */
+.channels {
+  background: var(--ink);
+  color: var(--paper);
+  padding-block: clamp(3.5rem, 7vw, 6rem);
+}
+
+.section-head { max-width: 56ch; margin-bottom: clamp(2.5rem, 5vw, 3.5rem); }
+.section-head h2 {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+  text-transform: none;
+}
+.section-head p {
+  margin-top: 1rem;
+  color: var(--line-light);
+  color: rgba(241, 238, 228, 0.72);
+  font-size: 1.05rem;
+}
+
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--line-light);
+  border: 1px solid var(--line-light);
+}
+
+.channel-card {
+  background: var(--ink);
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  transition: background-color 0.15s ease;
+}
+.channel-card--wide { grid-column: span 3; }
+
+.channel-card:hover { background: var(--teal-dim); }
+
+.channel-card__icon {
+  width: 40px;
+  height: 40px;
+}
+
+.channel-card h3 {
+  font-size: 1.2rem;
+  text-transform: none;
+}
+
+.channel-card p {
+  font-size: 0.95rem;
+  color: rgba(241, 238, 228, 0.72);
+  max-width: 38ch;
+}
+
+/* -------------------------------------------------------------
+   6. Approach section (Flexbox two-column)
+------------------------------------------------------------- */
+.approach { padding-block: clamp(3.5rem, 7vw, 6rem); }
+
+.approach__inner {
+  display: flex;
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: flex-start;
+}
+
+.approach__copy { flex: 1 1 58%; }
+.approach__copy h2 {
+  font-size: clamp(1.6rem, 3vw, 2.1rem);
+  max-width: 20ch;
+  text-transform: none;
+}
+.approach__copy p {
+  margin-top: 1.25rem;
+  max-width: 58ch;
+  font-size: 1.05rem;
+}
+
+.approach__points {
+  margin-top: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.approach__points li {
+  padding-left: 1.4rem;
+  position: relative;
+  font-size: 0.98rem;
+}
+.approach__points li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.5em;
+  width: 8px;
+  height: 8px;
+  background: var(--signal);
+}
+
+.approach__panel {
+  flex: 1 1 34%;
+  background: var(--teal);
+  color: var(--paper);
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.approach__panel-quote {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+.approach__panel-attr {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: rgba(241, 238, 228, 0.7);
+}
+
+/* -------------------------------------------------------------
+   7. Footer (Flexbox + Grid hybrid)
+------------------------------------------------------------- */
+.site-footer {
+  background: var(--paper-dim);
+  border-top: 1px solid var(--line);
+}
+
+.site-footer__inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 2.5rem;
+  padding-block: clamp(3rem, 6vw, 4.5rem);
+}
+
+.footer-block h3 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+  color: var(--teal);
+}
+
+.footer-block p { font-size: 0.9rem; margin-top: 0.75rem; }
+
+.footer-contact, .footer-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+}
+.footer-contact a:hover, .footer-links a:hover { color: var(--signal); }
+
+.brand--footer .brand__name { font-size: 1rem; }
+
+.site-footer__bottom {
+  border-top: 1px solid var(--line);
+  padding-block: 1.25rem;
+  font-size: 0.8rem;
+  color: rgba(20, 20, 15, 0.6);
+}
+
+/* -------------------------------------------------------------
+   8. Responsive breakpoints
+------------------------------------------------------------- */
+
+/* Tablet ---------------------------------------------------- */
+@media (max-width: 900px) {
+  .site-footer__inner {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-block--brand { grid-column: 1 / -1; }
+
+  /* Switch from the 6-column desktop grid (two wide cards + three
+     narrow ones, filling exactly two full rows) to a plain 2-column
+     grid. With five cards that leaves one odd card out, so it's sent
+     full-width instead of left as a half-empty row. */
+  .channel-grid { grid-template-columns: repeat(2, 1fr); }
+  .channel-card,
+  .channel-card--wide { grid-column: span 1; }
+  .channel-card:last-child { grid-column: 1 / -1; }
+}
+
+/* Mobile ------------------------------------------------------ */
+@media (max-width: 720px) {
+  .nav-toggle { display: inline-flex; align-items: center; }
+
+  .primary-nav {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: min(78vw, 320px);
+    height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 5.5rem 1.75rem 2rem;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+  /* General sibling selector: when #navToggle is checked, slide in the
+     .primary-nav that follows it in the markup. No JavaScript involved —
+     the browser applies :checked purely from user interaction with the
+     checkbox. */
+  .nav-toggle-input:checked ~ .primary-nav { transform: translateX(0); }
+
+  .nav-close {
+    display: block;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.75rem;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+  }
+  .nav-close::before,
+  .nav-close::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--paper);
+  }
+  .nav-close::before { transform: rotate(45deg); }
+  .nav-close::after { transform: rotate(-45deg); }
+
+  .primary-nav__list {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .primary-nav__list a { font-size: 1.1rem; }
+
+  .primary-nav__cta { margin-top: 2rem; align-self: flex-start; }
+
+  .hero__inner { flex-direction: column-reverse; }
+  .hero__banner { width: min(70%, 280px); margin-inline: auto; }
+  .hero__copy { text-align: left; }
+  .hero__facts { gap: 1.5rem 2rem; }
+
+  .channel-grid { grid-template-columns: 1fr; }
+  .channel-card,
+  .channel-card--wide { grid-column: 1 / -1; }
+
+  .approach__inner { flex-direction: column; }
+  .approach__panel { width: 100%; }
+
+  .site-footer__inner { grid-template-columns: 1fr; gap: 2rem; }
+}

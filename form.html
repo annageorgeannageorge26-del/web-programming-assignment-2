@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Compact Form Validation</title>
+  <style>
+    body { font-family: sans-serif; max-width: 380px; margin: 40px auto; }
+    form { display: none; flex-direction: column; gap: 10px; margin-top: 16px; }
+    form.active { display: flex; }
+    input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+    input.invalid { border-color: #d93025; }
+    .err { color: #d93025; font-size: 12px; min-height: 14px; }
+    button { padding: 9px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <button onclick="switchForm('reg')">Register</button>
+  <button onclick="switchForm('login')">Login</button>
+
+  <!-- Register Form -->
+  <form id="reg" class="active" novalidate>
+    <h3>Register</h3>
+    <input type="text" id="r-name" placeholder="Name" />
+    <span class="err"></span>
+
+    <input type="email" id="r-email" placeholder="Email" />
+    <span class="err"></span>
+
+    <input type="password" id="r-pass" placeholder="Password (8+ chars, A-z, 0-9, symbol)" />
+    <span class="err"></span>
+
+    <button type="submit">Create Account</button>
+  </form>
+
+  <!-- Login Form -->
+  <form id="login" novalidate>
+    <h3>Login</h3>
+    <input type="email" id="l-email" placeholder="Email" />
+    <span class="err"></span>
+
+    <input type="password" id="l-pass" placeholder="Password" />
+    <span class="err"></span>
+
+    <button type="submit">Sign In</button>
+  </form>
+
+  <script>
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const strongPassRe = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+    function switchForm(id) {
+      document.querySelectorAll("form").forEach(f => f.classList.toggle("active", f.id === id));
+    }
+
+    function checkField(input, rule, msg) {
+      const errEl = input.nextElementSibling;
+      const valid = rule(input.value.trim());
+      input.classList.toggle("invalid", !valid);
+      errEl.textContent = valid ? "" : msg;
+      return valid;
+    }
+
+    const rules = {
+      "r-name": () => checkField(rName, v => v.length > 0, "Name is required."),
+      "r-email": () => checkField(rEmail, v => emailRe.test(v), "Enter a valid email."),
+      "r-pass": () => checkField(rPass, v => strongPassRe.test(v), "Use 8+ chars with upper, lower, number & symbol."),
+      "l-email": () => checkField(lEmail, v => emailRe.test(v), "Enter a valid email."),
+      "l-pass": () => checkField(lPass, v => v.length > 0, "Password is required.")
+    };
+
+    const [rName, rEmail, rPass, lEmail, lPass] =
+      ["r-name", "r-email", "r-pass", "l-email", "l-pass"].map(id => document.getElementById(id));
+
+    Object.entries(rules).forEach(([id, fn]) => {
+      document.getElementById(id).addEventListener("input", fn);
+    });
+
+    document.getElementById("reg").addEventListener("submit", e => {
+      e.preventDefault();
+      if ([rules["r-name"](), rules["r-email"](), rules["r-pass"]()].every(Boolean)) {
+        alert("Registration valid!");
+      }
+    });
+
+    document.getElementById("login").addEventListener("submit", e => {
+      e.preventDefault();
+      if ([rules["l-email"](), rules["l-pass"]()].every(Boolean)) {
+        alert("Login valid!");
+      }
+    });
+  </script>
+</body>
+</html>
